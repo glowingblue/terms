@@ -30,15 +30,17 @@ class UserPoliciesRelationship implements ExtenderInterface
     public function addAttributes(Serializing $event)
     {
         if ($event->isSerializer(BasicUserSerializer::class)) {
-            if ($event->actor->can('seeFoFTermsPoliciesState', $event->model)) {
-                /**
-                 * @var $policies PolicyRepository
-                 */
-                $policies = app(PolicyRepository::class);
+            if (!($event->model->isGuest() || $event->actor->isGuest())) {
+                if ($event->actor->can('seeFoFTermsPoliciesState', $event->model)) {
+                    /**
+                     * @var $policies PolicyRepository
+                     */
+                    $policies = app(PolicyRepository::class);
 
-                $event->attributes['fofTermsPoliciesState'] = $policies->state($event->model);
-                $event->attributes['fofTermsPoliciesHasUpdate'] = $policies->hasPoliciesUpdate($event->model);
-                $event->attributes['fofTermsPoliciesMustAccept'] = $policies->mustAcceptNewPolicies($event->model);
+                    $event->attributes['fofTermsPoliciesState'] = $policies->state($event->model);
+                    $event->attributes['fofTermsPoliciesHasUpdate'] = $policies->hasPoliciesUpdate($event->model);
+                    $event->attributes['fofTermsPoliciesMustAccept'] = $policies->mustAcceptNewPolicies($event->model);
+                }
             }
         }
     }
